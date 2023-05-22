@@ -86,7 +86,7 @@ func deleteTODO(todo string, p fyne.Preferences) {
 }
 
 func loadTODOs(p fyne.Preferences) []string {
-	all := p.String("items")
+	all := p.StringWithFallback("items", "Do this item"+joiner+"Learn Fyne!"+joiner+"Build an app")
 	if all == "" {
 		return []string{}
 	}
