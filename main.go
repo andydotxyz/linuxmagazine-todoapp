@@ -1,12 +1,16 @@
 package main
 
 import (
+	"strings"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
+
+const joiner = "|"
 
 var (
 	todos []string
@@ -17,12 +21,15 @@ func main() {
 	a := app.NewWithID("xyz.andy.todo")
 	w := a.NewWindow("TODO")
 
-	w.SetContent(loadUI())
+	todos = loadTODOs(a.Preferences())
+
+	w.SetContent(loadUI(a))
 	w.Resize(fyne.NewSize(200, 280))
 	w.ShowAndRun()
 }
 
-func loadUI() fyne.CanvasObject {
+func loadUI(a fyne.App) fyne.CanvasObject {
+	p := a.Preferences()
 	list = widget.NewList(
 		func() int {
 			return len(todos)
@@ -40,18 +47,18 @@ func loadUI() fyne.CanvasObject {
 					return
 				}
 
-				deleteTODO(check.Text)
+				deleteTODO(check.Text, p)
 			}
 		})
 
 	input := widget.NewEntry()
 	input.SetPlaceHolder("New item")
 	add := widget.NewButtonWithIcon("", theme.ContentAddIcon(), func() {
-		addTODO(input.Text)
+		addTODO(input.Text, p)
 		input.SetText("")
 	})
 	input.OnSubmitted = func(item string) {
-		addTODO(item)
+		addTODO(item, p)
 		input.SetText("")
 	}
 	head := container.NewBorder(nil, nil, nil, add, input)
@@ -59,12 +66,13 @@ func loadUI() fyne.CanvasObject {
 	return container.NewBorder(head, nil, nil, nil, list)
 }
 
-func addTODO(todo string) {
+func addTODO(todo string, p fyne.Preferences) {
 	todos = append(todos, todo)
 	list.Refresh()
+	saveTODOs(todos, p)
 }
 
-func deleteTODO(todo string) {
+func deleteTODO(todo string, p fyne.Preferences) {
 	for i, text := range todos {
 		if text != todo {
 			continue
@@ -74,4 +82,18 @@ func deleteTODO(todo string) {
 		break
 	}
 	list.Refresh()
+	saveTODOs(todos, p)
+}
+
+func loadTODOs(p fyne.Preferences) []string {
+	all := p.String("items")
+	if all == "" {
+		return []string{}
+	}
+	return strings.Split(all, joiner)
+}
+
+func saveTODOs(items []string, p fyne.Preferences) {
+	allItems := strings.Join(items, joiner)
+	p.SetString("items", allItems)
 }
