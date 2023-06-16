@@ -10,6 +10,6 @@ local storage through the Fyne Preferences API to store information.
 
 The app will compile and run on Linux, macOS, Windows, BSDs, Android and iOS.
 
-<p style="text-align: center;">
+<p align="center" style="max-width: 100%">
 <img width="296" height="439" src="img/screenshot.png" />
 </p>
